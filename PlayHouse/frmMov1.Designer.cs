@@ -99,7 +99,7 @@
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(46, 32);
             this.button6.TabIndex = 5;
-            this.button6.Text = "A-6";
+            this.button6.Text = "B-1";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.SeatButton_Click);
             // 
@@ -109,7 +109,7 @@
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(46, 32);
             this.button7.TabIndex = 6;
-            this.button7.Text = "A-7";
+            this.button7.Text = "B-2";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.SeatButton_Click);
             // 
@@ -119,7 +119,7 @@
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(46, 32);
             this.button8.TabIndex = 7;
-            this.button8.Text = "A-8";
+            this.button8.Text = "B-3";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.SeatButton_Click);
             // 
@@ -129,7 +129,7 @@
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(46, 32);
             this.button9.TabIndex = 8;
-            this.button9.Text = "A-9";
+            this.button9.Text = "B-4";
             this.button9.UseVisualStyleBackColor = true;
             this.button9.Click += new System.EventHandler(this.SeatButton_Click);
             // 
@@ -139,7 +139,7 @@
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(46, 32);
             this.button10.TabIndex = 9;
-            this.button10.Text = "A-10";
+            this.button10.Text = "B-5";
             this.button10.UseVisualStyleBackColor = true;
             this.button10.Click += new System.EventHandler(this.SeatButton_Click);
             // 
@@ -156,11 +156,10 @@
             // lblPrice
             // 
             this.lblPrice.AutoSize = true;
-            this.lblPrice.Location = new System.Drawing.Point(239, 326);
+            this.lblPrice.Location = new System.Drawing.Point(137, 326);
             this.lblPrice.Name = "lblPrice";
-            this.lblPrice.Size = new System.Drawing.Size(35, 13);
+            this.lblPrice.Size = new System.Drawing.Size(0, 13);
             this.lblPrice.TabIndex = 11;
-            this.lblPrice.Text = "label1";
             // 
             // label1
             // 

@@ -175,10 +175,11 @@ namespace PlayHouse
                         {
                             cmd.Parameters.AddWithValue("@scrID", screeningID);
                             cmd.Parameters.AddWithValue("@seatLabel", seatLabel);
-                            cmd.Parameters.AddWithValue("@ticketID", ticketID); // Pass the generated GUID
+                            cmd.Parameters.AddWithValue("@ticketID", ticketID);
 
-                            if (CurrentUserID <= 3)
-                                cmd.Parameters.AddWithValue("@uID", DBNull.Value); // Use DBNull.Value for Guest
+                            // MODIFIED LOGIC: A UserID of 0 indicates a Guest/unregistered user.
+                            if (CurrentUserID == 0)
+                                cmd.Parameters.AddWithValue("@uID", DBNull.Value);
                             else
                                 cmd.Parameters.AddWithValue("@uID", CurrentUserID);
 
@@ -214,5 +215,10 @@ namespace PlayHouse
                 MessageBox.Show("Reservation Failed: " + ex.Message);
             }
         }
+
+        //private void lblPrice_Click(object sender, EventArgs e)
+        //{
+
+        //}
     }
 }

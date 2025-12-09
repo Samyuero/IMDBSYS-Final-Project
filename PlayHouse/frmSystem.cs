@@ -16,121 +16,258 @@ namespace PlayHouse
     {
         private const string ConnectionString = "Server=localhost; Database=PlayHouseDB; Integrated Security=True;";
 
+        // User Details
         private int CurrentUserID = 0;
         private string CurrentUserRole = "Guest";
 
-        private int LesMiserablesID = 0;
-        private int AladdinID = 0;
-        private DateTime LesMiserablesShowTime;
-        private DateTime AladdinShowTime;
+        // Active Movie Details (No longer hardcoded!)
+        private int ActiveScreeningID = 0;
+        private string ActiveMovieTitle = "";
+        private DateTime ActiveShowTime;
 
         public frmSystem(int userID, string roleName)
         {
             InitializeComponent();
             this.CurrentUserID = userID;
             this.CurrentUserRole = roleName;
-
             this.Text = $"PlayHouse - {roleName}" + (userID != 0 ? $" (User ID: {userID})" : "");
         }
 
         private void frmSystem_Load(object sender, EventArgs e)
         {
-            LoadScreeningIDs();
-
-            // Role-specific behavior
+            // 1. Setup based on Role
             if (CurrentUserRole == "Admin")
             {
-                MessageBox.Show("Welcome Admin!");
-                reportsToolStripMenuItem.Visible = true;
-                reportsToolStripMenuItem.Enabled = true;
+                MessageBox.Show("Welcome Admin! Admin controls are now visible.");
+                // Show the admin tools you added in the designer
+                cmbAdminMovies.Visible = true;
+                btnAdminUpdate.Visible = true;
+                LoadMoviesIntoAdminDropdown();
             }
-            else if (CurrentUserRole == "Customer")
+            else
             {
-                MessageBox.Show("Welcome Customer!");
-                historyToolStripMenuItem.Enabled = true;
+                // Hide admin tools for Customers/Guests
+                cmbAdminMovies.Visible = false;
+                btnAdminUpdate.Visible = false;
+
+                if (CurrentUserRole == "Customer")
+                {
+                    MessageBox.Show("Welcome Customer!");
+                    if (historyToolStripMenuItem != null) historyToolStripMenuItem.Enabled = true;
+                }
+                else
+                {
+                    MessageBox.Show("Welcome Guest!");
+                    if (historyToolStripMenuItem != null) historyToolStripMenuItem.Visible = false;
+                }
             }
-            else // Guest
-            {
-                MessageBox.Show("Welcome Guest!");
-            }
+
+            // 2. Load the default/current movie (Starts with the first one found)
+            LoadActiveMovie();
         }
 
-        private void LoadScreeningIDs()
+        // ==========================================
+        // ADMIN FUNCTIONALITY
+        // ==========================================
+
+        private void LoadMoviesIntoAdminDropdown()
         {
             try
             {
                 using (SqlConnection con = new SqlConnection(ConnectionString))
                 {
                     con.Open();
+                    SqlDataAdapter da = new SqlDataAdapter("SELECT ScreeningID, MovieTitle FROM TBL_SCREENING", con);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
 
-                    string query = @"SELECT MovieTitle, ScreeningID, ShowTime 
-                                     FROM TBL_SCREENING 
-                                     WHERE MovieTitle IN ('Les Misérables', 'Aladdin')";
-
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        SqlDataReader reader = cmd.ExecuteReader();
-                        while (reader.Read())
-                        {
-                            string title = reader["MovieTitle"].ToString();
-                            int id = Convert.ToInt32(reader["ScreeningID"]);
-                            DateTime showTime = Convert.ToDateTime(reader["ShowTime"]);
-
-                            if (title == "Les Misérables")
-                            {
-                                LesMiserablesID = id;
-                                LesMiserablesShowTime = showTime;
-                            }
-                            else if (title == "Aladdin")
-                            {
-                                AladdinID = id;
-                                AladdinShowTime = showTime;
-                            }
-                        }
-                    }
+                    cmbAdminMovies.DataSource = dt;
+                    cmbAdminMovies.DisplayMember = "MovieTitle"; // What the Admin sees
+                    cmbAdminMovies.ValueMember = "ScreeningID";  // The ID behind the scenes
                 }
-
-                if (LesMiserablesID == 0 || AladdinID == 0)
-                {
-                    MessageBox.Show("Error: Could not find all movie screenings in the database.", "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-                UpdateMovieLabels();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Database Error during System Load: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error loading movie list: " + ex.Message);
             }
         }
 
-        private void UpdateMovieLabels()
+        // Double click your 'btnAdminUpdate' in designer to link this event, 
+        // OR ensure the button is hooked to this method in the events panel.
+        private void btnAdminUpdate_Click(object sender, EventArgs e)
         {
-            label1.Text = LesMiserablesID != 0 ? LesMiserablesShowTime.ToString("dd MMM yyyy, h:mm tt") : "Showtime N/A";
-            lblName.Text = "Les Misérables";
+            if (cmbAdminMovies.SelectedValue == null) return;
+
+            int selectedID = Convert.ToInt32(cmbAdminMovies.SelectedValue);
+            string selectedTitle = cmbAdminMovies.Text;
+
+            DialogResult result = MessageBox.Show(
+                $"Change active movie to '{selectedTitle}'?\n\nWARNING: This will RESET (delete) all reservations for this movie!",
+                "Confirm Change",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                ResetReservations(selectedID);
+
+                // **NEW: PERSIST THE CHANGE TO THE DATABASE**
+                using (SqlConnection con = new SqlConnection(ConnectionString))
+                {
+                    con.Open();
+                    string updateQuery = @"
+                UPDATE TBL_CONFIG 
+                SET ConfigValue = @id 
+                WHERE ConfigKey = 'ActiveScreeningID'";
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id", selectedID);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                ActiveScreeningID = selectedID; // Update memory variable
+                ActiveMovieTitle = selectedTitle;
+
+                LoadActiveMovieData(selectedID); // Refresh UI
+                MessageBox.Show("Movie updated and seats reset.");
+            }
         }
 
-        private void button1_Click(object sender, EventArgs e) // Les Misérables
+        private void ResetReservations(int screeningID)
         {
-            if (LesMiserablesID == 0)
+            using (SqlConnection con = new SqlConnection(ConnectionString))
             {
-                MessageBox.Show("Screening data not available. Please restart.", "Error");
+                con.Open();
+                string query = "DELETE FROM TBL_RESERVATION WHERE ScreeningID = @id";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@id", screeningID);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // ==========================================
+        // CORE SYSTEM FUNCTIONALITY
+        // ==========================================
+
+        private void LoadActiveMovie()
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(ConnectionString))
+                {
+                    con.Open();
+                    // 1. Read the saved ActiveScreeningID from the configuration table
+                    string configQuery = "SELECT ConfigValue FROM TBL_CONFIG WHERE ConfigKey = 'ActiveScreeningID'";
+                    using (SqlCommand cmd = new SqlCommand(configQuery, con))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && int.TryParse(result.ToString(), out int savedID))
+                        {
+                            ActiveScreeningID = savedID;
+                        }
+                        else
+                        {
+                            // Fallback if the config key is missing (set to 1)
+                            ActiveScreeningID = 1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading active movie configuration: " + ex.Message);
+                ActiveScreeningID = 1; // Safety fallback
+            }
+
+            LoadActiveMovieData(ActiveScreeningID);
+        }
+
+        private void LoadActiveMovieData(int id)
+        {
+            if (id == 0) return;
+
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                con.Open();
+                string query = "SELECT MovieTitle, ShowTime FROM TBL_SCREENING WHERE ScreeningID = @id";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        ActiveMovieTitle = reader["MovieTitle"].ToString();
+                        ActiveShowTime = Convert.ToDateTime(reader["ShowTime"]);
+
+                        // Update UI Labels
+                        lblName.Text = ActiveMovieTitle;
+                        label1.Text = ActiveShowTime.ToString("dd MMM yyyy, h:mm tt");
+
+                        // Update Image
+                        UpdateMovieImage(ActiveMovieTitle);
+                    }
+                }
+            }
+        }
+
+        private void UpdateMovieImage(string title)
+        {
+            // NOTE: For this to work, you must add images to your Project Resources
+            // Go to Project Properties -> Resources -> Add Existing File
+            // Name them: LesMis, Aladdin, Phantom
+
+            try
+            {
+                if (title == "Les Misérables")
+                {
+                    picMoviePoster.Image = Properties.Resources.LesMis; 
+                    // Uncomment above line after adding image
+                    picMoviePoster.BackColor = Color.Blue; // Placeholder color
+                }
+                else if (title == "Aladdin")
+                {
+                    picMoviePoster.Image = Properties.Resources.Aladdin;
+                    picMoviePoster.BackColor = Color.Gold; // Placeholder color
+                }
+                else if (title == "The Phantom of the Opera")
+                {
+                    picMoviePoster.Image = Properties.Resources.Phantom;
+                    picMoviePoster.BackColor = Color.Black; // Placeholder color
+                }
+                else
+                {
+                    picMoviePoster.Image = null;
+                    picMoviePoster.BackColor = Color.Gray;
+                }
+            }
+            catch
+            {
+                // Fallback if image fails
+                picMoviePoster.BackColor = Color.Red;
+            }
+        }
+
+        // This is your 'Book Now' button
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (ActiveScreeningID == 0)
+            {
+                MessageBox.Show("System Error: No active movie selected.");
                 return;
             }
 
-            frmMov1 movieForm = new frmMov1(LesMiserablesID, CurrentUserID);
+            // Open the booking form with the CURRENT active movie ID
+            frmMov1 movieForm = new frmMov1(ActiveScreeningID, CurrentUserID);
             movieForm.ShowDialog();
-
-            LoadScreeningIDs();
-        }
-
-        private void reportsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
         }
 
         private void historyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            // History code here
         }
+
     }
 }
