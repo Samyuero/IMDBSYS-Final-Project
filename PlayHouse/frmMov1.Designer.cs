@@ -45,7 +45,8 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(251, 163);
+            this.button1.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button1.Location = new System.Drawing.Point(114, 165);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(46, 32);
             this.button1.TabIndex = 0;
@@ -55,7 +56,8 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(303, 163);
+            this.button2.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button2.Location = new System.Drawing.Point(182, 165);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(46, 32);
             this.button2.TabIndex = 1;
@@ -65,7 +67,8 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(355, 163);
+            this.button3.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button3.Location = new System.Drawing.Point(252, 165);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(46, 32);
             this.button3.TabIndex = 2;
@@ -75,7 +78,8 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(407, 163);
+            this.button4.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button4.Location = new System.Drawing.Point(324, 165);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(46, 32);
             this.button4.TabIndex = 3;
@@ -85,7 +89,8 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(459, 163);
+            this.button5.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button5.Location = new System.Drawing.Point(394, 165);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(46, 32);
             this.button5.TabIndex = 4;
@@ -95,7 +100,8 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(251, 213);
+            this.button6.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button6.Location = new System.Drawing.Point(114, 215);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(46, 32);
             this.button6.TabIndex = 5;
@@ -105,7 +111,8 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(303, 213);
+            this.button7.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button7.Location = new System.Drawing.Point(182, 215);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(46, 32);
             this.button7.TabIndex = 6;
@@ -115,7 +122,8 @@
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(355, 213);
+            this.button8.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button8.Location = new System.Drawing.Point(252, 215);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(46, 32);
             this.button8.TabIndex = 7;
@@ -125,7 +133,8 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(407, 213);
+            this.button9.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button9.Location = new System.Drawing.Point(324, 215);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(46, 32);
             this.button9.TabIndex = 8;
@@ -135,7 +144,8 @@
             // 
             // button10
             // 
-            this.button10.Location = new System.Drawing.Point(459, 213);
+            this.button10.Font = new System.Drawing.Font("Times New Roman", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button10.Location = new System.Drawing.Point(394, 215);
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(46, 32);
             this.button10.TabIndex = 9;
@@ -145,7 +155,7 @@
             // 
             // reserveBtn
             // 
-            this.reserveBtn.Location = new System.Drawing.Point(407, 311);
+            this.reserveBtn.Location = new System.Drawing.Point(336, 326);
             this.reserveBtn.Name = "reserveBtn";
             this.reserveBtn.Size = new System.Drawing.Size(110, 42);
             this.reserveBtn.TabIndex = 10;
@@ -156,31 +166,37 @@
             // lblPrice
             // 
             this.lblPrice.AutoSize = true;
-            this.lblPrice.Location = new System.Drawing.Point(137, 326);
+            this.lblPrice.BackColor = System.Drawing.Color.Transparent;
+            this.lblPrice.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPrice.ForeColor = System.Drawing.Color.MistyRose;
+            this.lblPrice.Location = new System.Drawing.Point(94, 298);
             this.lblPrice.Name = "lblPrice";
-            this.lblPrice.Size = new System.Drawing.Size(0, 13);
+            this.lblPrice.Size = new System.Drawing.Size(0, 19);
             this.lblPrice.TabIndex = 11;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.Sienna;
+            this.label1.BackColor = System.Drawing.Color.DarkRed;
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 72F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.label1.Location = new System.Drawing.Point(215, 41);
+            this.label1.Font = new System.Drawing.Font("Times New Roman", 72F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Gainsboro;
+            this.label1.Image = global::PlayHouse.Properties.Resources._4;
+            this.label1.Location = new System.Drawing.Point(81, 33);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(346, 110);
+            this.label1.Size = new System.Drawing.Size(399, 111);
             this.label1.TabIndex = 12;
-            this.label1.Text = "SHOW";
+            this.label1.Text = "S H O W";
             // 
             // frmMov1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.WindowFrame;
-            this.ClientSize = new System.Drawing.Size(800, 415);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.BackgroundImage = global::PlayHouse.Properties.Resources._3;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.ClientSize = new System.Drawing.Size(562, 415);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblPrice);
             this.Controls.Add(this.reserveBtn);
@@ -194,8 +210,11 @@
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
+            this.MaximumSize = new System.Drawing.Size(578, 454);
+            this.MinimumSize = new System.Drawing.Size(578, 454);
             this.Name = "frmMov1";
-            this.Text = "frmMov1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "PlayHouse";
             this.Load += new System.EventHandler(this.frmMov1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

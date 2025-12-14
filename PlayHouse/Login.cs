@@ -91,6 +91,7 @@ namespace PlayHouse
 
         }
 
+        // GUEST BUTTON
         private void button1_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -99,6 +100,13 @@ namespace PlayHouse
             systemForm.ShowDialog();
 
             this.Close();
+        }
+
+        // REGISTER BUTTON
+        private void button2_Click(object sender, EventArgs e)
+        {
+            frmRegistration reg = new frmRegistration("Guest");
+            reg.ShowDialog();
         }
     }
 }

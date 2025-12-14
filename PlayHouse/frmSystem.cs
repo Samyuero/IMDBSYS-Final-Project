@@ -5,7 +5,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,7 +19,7 @@ namespace PlayHouse
         private int CurrentUserID = 0;
         private string CurrentUserRole = "Guest";
 
-        // Active Movie Details (No longer hardcoded!)
+        // Active Movie Details
         private int ActiveScreeningID = 0;
         private string ActiveMovieTitle = "";
         private DateTime ActiveShowTime;
@@ -33,125 +32,6 @@ namespace PlayHouse
             this.Text = $"PlayHouse - {roleName}" + (userID != 0 ? $" (User ID: {userID})" : "");
         }
 
-        private void frmSystem_Load(object sender, EventArgs e)
-        {
-            // 1. Setup based on Role
-            if (CurrentUserRole == "Admin")
-            {
-                MessageBox.Show("Welcome Admin! Admin controls are now visible.");
-                // Show the admin tools you added in the designer
-                cmbAdminMovies.Visible = true;
-                btnAdminUpdate.Visible = true;
-                LoadMoviesIntoAdminDropdown();
-            }
-            else
-            {
-                // Hide admin tools for Customers/Guests
-                cmbAdminMovies.Visible = false;
-                btnAdminUpdate.Visible = false;
-
-                if (CurrentUserRole == "Customer")
-                {
-                    MessageBox.Show("Welcome Customer!");
-                    if (historyToolStripMenuItem != null) historyToolStripMenuItem.Enabled = true;
-                }
-                else
-                {
-                    MessageBox.Show("Welcome Guest!");
-                    if (historyToolStripMenuItem != null) historyToolStripMenuItem.Visible = false;
-                }
-            }
-
-            // 2. Load the default/current movie (Starts with the first one found)
-            LoadActiveMovie();
-        }
-
-        // ==========================================
-        // ADMIN FUNCTIONALITY
-        // ==========================================
-
-        private void LoadMoviesIntoAdminDropdown()
-        {
-            try
-            {
-                using (SqlConnection con = new SqlConnection(ConnectionString))
-                {
-                    con.Open();
-                    SqlDataAdapter da = new SqlDataAdapter("SELECT ScreeningID, MovieTitle FROM TBL_SCREENING", con);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    cmbAdminMovies.DataSource = dt;
-                    cmbAdminMovies.DisplayMember = "MovieTitle"; // What the Admin sees
-                    cmbAdminMovies.ValueMember = "ScreeningID";  // The ID behind the scenes
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error loading movie list: " + ex.Message);
-            }
-        }
-
-        // Double click your 'btnAdminUpdate' in designer to link this event, 
-        // OR ensure the button is hooked to this method in the events panel.
-        private void btnAdminUpdate_Click(object sender, EventArgs e)
-        {
-            if (cmbAdminMovies.SelectedValue == null) return;
-
-            int selectedID = Convert.ToInt32(cmbAdminMovies.SelectedValue);
-            string selectedTitle = cmbAdminMovies.Text;
-
-            DialogResult result = MessageBox.Show(
-                $"Change active movie to '{selectedTitle}'?\n\nWARNING: This will RESET (delete) all reservations for this movie!",
-                "Confirm Change",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                ResetReservations(selectedID);
-
-                // **NEW: PERSIST THE CHANGE TO THE DATABASE**
-                using (SqlConnection con = new SqlConnection(ConnectionString))
-                {
-                    con.Open();
-                    string updateQuery = @"
-                UPDATE TBL_CONFIG 
-                SET ConfigValue = @id 
-                WHERE ConfigKey = 'ActiveScreeningID'";
-                    using (SqlCommand cmd = new SqlCommand(updateQuery, con))
-                    {
-                        cmd.Parameters.AddWithValue("@id", selectedID);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-
-                ActiveScreeningID = selectedID; // Update memory variable
-                ActiveMovieTitle = selectedTitle;
-
-                LoadActiveMovieData(selectedID); // Refresh UI
-                MessageBox.Show("Movie updated and seats reset.");
-            }
-        }
-
-        private void ResetReservations(int screeningID)
-        {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                con.Open();
-                string query = "DELETE FROM TBL_RESERVATION WHERE ScreeningID = @id";
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@id", screeningID);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        // ==========================================
-        // CORE SYSTEM FUNCTIONALITY
-        // ==========================================
-
         private void LoadActiveMovie()
         {
             try
@@ -159,7 +39,7 @@ namespace PlayHouse
                 using (SqlConnection con = new SqlConnection(ConnectionString))
                 {
                     con.Open();
-                    // 1. Read the saved ActiveScreeningID from the configuration table
+                    // Read the saved ActiveScreeningID from the configuration table
                     string configQuery = "SELECT ConfigValue FROM TBL_CONFIG WHERE ConfigKey = 'ActiveScreeningID'";
                     using (SqlCommand cmd = new SqlCommand(configQuery, con))
                     {
@@ -185,6 +65,121 @@ namespace PlayHouse
             LoadActiveMovieData(ActiveScreeningID);
         }
 
+        private void frmSystem_Load(object sender, EventArgs e)
+        {
+            // Setup based on Role
+            if (CurrentUserRole == "Admin")
+            {
+                MessageBox.Show("Welcome Admin!");
+                // Show the admin tools you added in the designer
+                cmbAdminMovies.Visible = true;
+                btnAdminUpdate.Visible = true;
+                addAccountToolStripMenuItem.Visible = true;
+                reservationsToolStripMenuItem.Visible=true;
+                LoadMoviesIntoAdminDropdown();
+            }
+            else
+            {
+                // Hide admin tools for Customers/Guests
+                cmbAdminMovies.Visible = false;
+                btnAdminUpdate.Visible = false;
+                addAccountToolStripMenuItem.Visible = false;
+                reservationsToolStripMenuItem.Visible = false;
+
+                if (CurrentUserRole == "Customer")
+                {
+                    MessageBox.Show("Welcome Customer!");
+                    if (historyToolStripMenuItem != null) historyToolStripMenuItem.Enabled = true;
+                }
+                else
+                {
+                    MessageBox.Show("Welcome Guest!");
+                    if (historyToolStripMenuItem != null) historyToolStripMenuItem.Visible = false;
+                }
+            }
+
+            // Load the default/current movie (Starts with the first one found)
+            LoadActiveMovie();
+        }
+
+        // ADMIN FUNCTIONALITY
+        private void LoadMoviesIntoAdminDropdown()
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(ConnectionString))
+                {
+                    con.Open();
+                    SqlDataAdapter da = new SqlDataAdapter("SELECT ScreeningID, MovieTitle FROM TBL_SCREENING", con);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    cmbAdminMovies.DataSource = dt;
+                    cmbAdminMovies.DisplayMember = "MovieTitle";
+                    cmbAdminMovies.ValueMember = "ScreeningID";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading movie list: " + ex.Message);
+            }
+        }
+
+        private void btnAdminUpdate_Click(object sender, EventArgs e)
+        {
+            if (cmbAdminMovies.SelectedValue == null) return;
+
+            int selectedID = Convert.ToInt32(cmbAdminMovies.SelectedValue);
+            string selectedTitle = cmbAdminMovies.Text;
+
+            DialogResult result = MessageBox.Show(
+                $"Change active movie to '{selectedTitle}'?\n\nWARNING: This will RESET (delete) all reservations for this movie!",
+                "Confirm Change",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                ResetReservations(selectedID);
+
+                // PERSIST THE CHANGE TO THE DATABASE
+                using (SqlConnection con = new SqlConnection(ConnectionString))
+                {
+                    con.Open();
+                    string updateQuery = @"
+                                        UPDATE TBL_CONFIG 
+                                        SET ConfigValue = @id 
+                                        WHERE ConfigKey = 'ActiveScreeningID'";
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id", selectedID);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                ActiveScreeningID = selectedID; //Update memory variable
+                ActiveMovieTitle = selectedTitle;
+
+                LoadActiveMovieData(selectedID); // Refresh UI
+                MessageBox.Show("Movie updated and seats reset.");
+            }
+        }
+
+        private void ResetReservations(int screeningID)
+        {
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                con.Open();
+                string query = "DELETE FROM TBL_RESERVATION WHERE ScreeningID = @id";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@id", screeningID);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // CORE SYSTEM FUNCTIONALITY
         private void LoadActiveMovieData(int id)
         {
             if (id == 0) return;
@@ -215,27 +210,23 @@ namespace PlayHouse
 
         private void UpdateMovieImage(string title)
         {
-            // NOTE: For this to work, you must add images to your Project Resources
-            // Go to Project Properties -> Resources -> Add Existing File
-            // Name them: LesMis, Aladdin, Phantom
-
             try
             {
                 if (title == "Les Misérables")
                 {
-                    picMoviePoster.Image = Properties.Resources.LesMis; 
+                    picMoviePoster.Image = Properties.Resources.LesMis;
                     // Uncomment above line after adding image
-                    picMoviePoster.BackColor = Color.Blue; // Placeholder color
+                    picMoviePoster.BackColor = Color.Blue; // Placeholder
                 }
                 else if (title == "Aladdin")
                 {
                     picMoviePoster.Image = Properties.Resources.Aladdin;
-                    picMoviePoster.BackColor = Color.Gold; // Placeholder color
+                    picMoviePoster.BackColor = Color.Gold; // Placeholder
                 }
                 else if (title == "The Phantom of the Opera")
                 {
                     picMoviePoster.Image = Properties.Resources.Phantom;
-                    picMoviePoster.BackColor = Color.Black; // Placeholder color
+                    picMoviePoster.BackColor = Color.Black; // Placeholder
                 }
                 else
                 {
@@ -250,7 +241,7 @@ namespace PlayHouse
             }
         }
 
-        // This is your 'Book Now' button
+        // 'Book Now' button
         private void button1_Click(object sender, EventArgs e)
         {
             if (ActiveScreeningID == 0)
@@ -266,7 +257,20 @@ namespace PlayHouse
 
         private void historyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // History code here
+            frmHistory historyForm = new frmHistory(CurrentUserID, CurrentUserRole);
+            historyForm.ShowDialog();
+        }
+
+        private void addAccountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmRegistration reg = new frmRegistration("Admin");
+            reg.ShowDialog();
+        }
+
+        private void reservationsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmReservations reservationsForm = new frmReservations();
+            reservationsForm.ShowDialog();
         }
 
     }
